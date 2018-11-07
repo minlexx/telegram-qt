@@ -82,6 +82,8 @@ bool Server::start()
     qCInfo(loggingCategoryServer).nospace().noquote() << this << " start server (DC " << m_dcOption.id << ") "
                                                       << "on " << m_dcOption.address << ":" << m_dcOption.port
                                                       << "; Key:" << hex << showbase << m_key.fingerprint;
+
+    addServiceUser();
     return true;
 }
 
@@ -100,6 +102,16 @@ void Server::stop()
     for (RemoteClientConnection *client : activeConnections) {
         client->transport()->disconnectFromHost();
     }
+}
+
+void Server::addServiceUser()
+{
+    User *serviceUser = new User(this);
+    serviceUser->setPhoneNumber(QStringLiteral("+42777"));
+    serviceUser->setFirstName(QStringLiteral("Telegram"));
+    serviceUser->setDcId(0);
+    m_serviceUserId = serviceUser->id();
+    insertUser(serviceUser);
 }
 
 void Server::loadData()
@@ -153,6 +165,22 @@ void Server::onNewConnection()
     client->setRpcFactories(m_rpcOperationFactories);
 
     m_activeConnections.insert(client);
+}
+
+void Server::onUserSessionAdded(Session *newSession)
+{
+    RemoteUser *sender = getServiceUser();
+    User *recipient = newSession->user();
+
+    QString text = QStringLiteral("Detected login from IP address %1").arg(newSession->ip);
+
+    TLMessage m;
+    m.tlType = TLValue::Message;
+    m.message = text;
+    m.toId = recipient->toTLPeer();
+    m.fromId = sender->id();
+    m.flags |= TLMessage::FromId;
+    recipient->addMessage(m);
 }
 
 void Server::onClientConnectionStatusChanged()
@@ -312,6 +340,13 @@ void Server::insertUser(User *user)
     for (Session *session : user->sessions()) {
         m_authIdToSession.insert(session->authId, session);
     }
+
+    connect(user, &User::sessionAdded, this, &Server::onUserSessionAdded);
+}
+
+RemoteUser *Server::getServiceUser()
+{
+    return m_users.value(m_serviceUserId);
 }
 
 PhoneStatus Server::getPhoneStatus(const QString &identifier) const

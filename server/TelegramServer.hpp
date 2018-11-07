@@ -38,6 +38,7 @@ public:
 
     bool start();
     void stop();
+    void addServiceUser();
     void loadData();
 
     void setServerConfiguration(const DcConfiguration &config);
@@ -81,12 +82,15 @@ public:
 
     void insertUser(User *user);
 
+    RemoteUser *getServiceUser();
+
 signals:
 
 public slots:
 
 protected slots:
     void onNewConnection();
+    void onUserSessionAdded(Session *newSession);
 
 protected:
     void onClientConnectionStatusChanged();
@@ -106,6 +110,7 @@ private:
     QSet<RemoteServerConnection*> m_remoteServers;
     QVector<RpcOperationFactory*> m_rpcOperationFactories;
     DcConfiguration m_dcConfiguration;
+    quint32 m_serviceUserId = 0;
 };
 
 } // Server
