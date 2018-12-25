@@ -77,6 +77,13 @@ bool LocalCluster::start()
     return !hasFails;
 }
 
+void LocalCluster::stop()
+{
+    for (Server *server : m_serverInstances) {
+        server->stop();
+    }
+}
+
 void LocalCluster::sendMessage(const QString &userId, const QString &text)
 {
     RemoteUser *sender = getServiceUser();

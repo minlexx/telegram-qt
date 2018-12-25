@@ -58,6 +58,7 @@ public:
     void setServerPrivateRsaKey(const Telegram::RsaKey &key);
 
     bool start();
+    void stop();
 
     void sendMessage(const QString &userId, const QString &text);
 
