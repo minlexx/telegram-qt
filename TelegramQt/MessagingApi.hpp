@@ -32,6 +32,17 @@ class MessagesOperation;
 
 class MessagingApiPrivate;
 
+struct TELEGRAMQT_EXPORT MessageFetchOptions
+{
+    quint32 offsetId = 0;
+    quint32 offsetDate = 0;
+    quint32 addOffset = 0;
+    quint32 limit = 0;
+    quint32 maxId = 0;
+    quint32 minId = 0;
+    quint32 hash = 0;
+};
+
 class TELEGRAMQT_EXPORT MessagingApi : public ClientApi
 {
     Q_OBJECT
@@ -65,7 +76,7 @@ public:
     };
 
     DialogList *getDialogList();
-    MessagesOperation *getHistory(const Telegram::Peer peer, quint32 limit);
+    MessagesOperation *getHistory(const Telegram::Peer peer, const MessageFetchOptions &options);
 
 public slots:
     void setDraftMessage(const Telegram::Peer peer, const QString &text);

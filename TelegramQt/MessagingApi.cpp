@@ -85,14 +85,24 @@ PendingOperation *MessagingApiPrivate::getDialogs()
     return operation;
 }
 
-MessagesOperation *MessagingApiPrivate::getHistory(const Peer peer, quint32 limit)
+MessagesOperation *MessagingApiPrivate::getHistory(const Peer peer, const Telegram::Client::MessageFetchOptions &options)
 {
     if (!peer.isValid()) {
         return PendingOperation::failOperation<MessagesOperation>(QStringLiteral("Invalid peer for getHistory()"), this);
     }
     TLInputPeer p = DataInternalApi::get(dataStorage())->toInputPeer(peer);
     MessagesOperation *operation = new MessagesOperation(this);
-    MessagesRpcLayer::PendingMessagesMessages *rpcOperation = messagesLayer()->getHistory(p, 0, 0, 0, limit, 0, 0, 0);
+    MessagesOperationPrivate *priv = MessagesOperationPrivate::get(operation);
+    priv->m_peer = peer;
+    priv->m_fetchOptions = options;
+    MessagesRpcLayer::PendingMessagesMessages *rpcOperation = messagesLayer()->getHistory(p,
+                                                                                          options.offsetId,
+                                                                                          options.offsetDate,
+                                                                                          options.addOffset,
+                                                                                          options.limit,
+                                                                                          options.maxId,
+                                                                                          options.minId,
+                                                                                          options.hash);
     rpcOperation->connectToFinished(this, &MessagingApiPrivate::onGetHistoryFinished, operation, rpcOperation);
     return operation;
 }
@@ -140,10 +150,10 @@ DialogList *MessagingApi::getDialogList()
 /*!
     Returns pending MessagesOperation with messages sorted from newer (higher message id) to older (lower message id)
 */
-MessagesOperation *MessagingApi::getHistory(const Telegram::Peer peer, quint32 limit)
+MessagesOperation *MessagingApi::getHistory(const Telegram::Peer peer, const Telegram::Client::MessageFetchOptions &options)
 {
     Q_D(MessagingApi);
-    return d->getHistory(peer, limit);
+    return d->getHistory(peer, options);
 }
 
 void MessagingApi::setDraftMessage(const Peer peer, const QString &text)
