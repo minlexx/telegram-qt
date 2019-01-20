@@ -34,6 +34,8 @@ class MessagingApiPrivate;
 
 struct TELEGRAMQT_EXPORT MessageFetchOptions
 {
+    MessageFetchOptions() = default;
+    MessageFetchOptions(int lim) { limit = lim; }
     quint32 offsetId = 0;
     quint32 offsetDate = 0;
     quint32 addOffset = 0;
