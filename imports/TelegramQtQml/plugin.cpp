@@ -226,10 +226,12 @@ public slots:
     {
         m_text = text;
     }
+
     void setGeoPoint(double latitude, double longitude)
     {
         qWarning() << Q_FUNC_INFO << latitude << longitude;
     }
+
     void setContact()
     {
 

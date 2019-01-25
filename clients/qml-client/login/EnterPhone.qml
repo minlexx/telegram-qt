@@ -13,7 +13,7 @@ AuthScreen {
     signal submitPhoneNumber(string phoneNumber)
 
     onActivate: countryBox.forceActiveFocus()
-    onSubmit: submitPhoneNumber(countryBox.currentCode + phoneNumberField.text)
+    onSubmit: submitPhoneNumber("+" + countryBox.currentCode + phoneNumberField.text)
 
     ComboBox {
         id: countryBox
